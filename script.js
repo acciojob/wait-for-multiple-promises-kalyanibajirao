@@ -1,70 +1,45 @@
-//your JS code here. If required.
-document.addEventListener('DOMContentLoaded', () => {
-  const output = document.getElementById('output');
+document.addEventListener("DOMContentLoaded", function() {
+    // Helper function to create a promise that resolves after a random time between 1 and 3 seconds
+    function createRandomPromise(index) {
+        return new Promise((resolve) => {
+            const startTime = Date.now();
+            const delay = Math.floor(Math.random() * 2000) + 1000; // Random delay between 1000ms and 3000ms
+            setTimeout(() => {
+                const timeTaken = (Date.now() - startTime) / 1000; // Time taken in seconds
+                resolve({ index, timeTaken });
+            }, delay);
+        });
+    }
 
-  // Adding the loading row
-  const loadingRow = document.createElement('tr');
-  const loadingCell = document.createElement('td');
-  loadingCell.setAttribute('colspan', '2');
-  loadingCell.textContent = 'Loading...';
-  loadingRow.appendChild(loadingCell);
-  output.appendChild(loadingRow);
+    // Create an array of 3 promises
+    const promises = [createRandomPromise(1), createRandomPromise(2), createRandomPromise(3)];
 
-  // Function to create a promise that resolves after a random time between 1 and 3 seconds
-  function createRandomPromise(promiseName) {
-    return new Promise((resolve) => {
-      const time = Math.random() * 2 + 1; // Random time between 1 and 3 seconds
-      setTimeout(() => resolve({ promiseName, time }), time * 1000);
-    });
-  }
+    // Start timing the total duration for all promises
+    const startTotalTime = Date.now();
 
-  // Create 3 promises
-  const promises = [
-    createRandomPromise('Promise 1'),
-    createRandomPromise('Promise 2'),
-    createRandomPromise('Promise 3'),
-  ];
+    // Wait for all promises to resolve using Promise.all
+    Promise.all(promises).then(results => {
+        const totalTime = (Date.now() - startTotalTime) / 1000; // Total time in seconds
 
-  const startTime = performance.now();
+        const table = document.getElementById('promiseTable');
 
-  // Use Promise.all to wait for all promises to resolve
-  Promise.all(promises)
-    .then(results => {
-      const endTime = performance.now();
-      const totalTime = ((endTime - startTime) / 1000).toFixed(3);
+        // Remove the loading row
+        table.innerHTML = '';
 
-      // Remove the loading row
-      output.removeChild(loadingRow);
+        // Populate the table with the results
+        results.forEach(result => {
+            const row = table.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            cell1.textContent = `Promise ${result.index}`;
+            cell2.textContent = `${result.timeTaken.toFixed(3)} seconds`;
+        });
 
-      // Populate the table with the resolved values
-      results.forEach((result, index) => {
-        const row = document.createElement('tr');
-        const promiseNameCell = document.createElement('td');
-        const timeTakenCell = document.createElement('td');
-
-        promiseNameCell.textContent = `Promise ${index + 1}`;
-        timeTakenCell.textContent = result.time.toFixed(3);
-
-        row.appendChild(promiseNameCell);
-        row.appendChild(timeTakenCell);
-
-        output.appendChild(row);
-      });
-
-      // Add the total time row
-      const totalRow = document.createElement('tr');
-      const totalNameCell = document.createElement('td');
-      const totalTimeCell = document.createElement('td');
-
-      totalNameCell.textContent = 'Total';
-      totalTimeCell.textContent = totalTime;
-
-      totalRow.appendChild(totalNameCell);
-      totalRow.appendChild(totalTimeCell);
-
-      output.appendChild(totalRow);
-    })
-    .catch(error => {
-      console.error('Error:', error);
+        // Add the total time row
+        const totalRow = table.insertRow();
+        const cell1 = totalRow.insertCell(0);
+        const cell2 = totalRow.insertCell(1);
+        cell1.textContent = 'Total';
+        cell2.textContent = `${totalTime.toFixed(3)} seconds`;
     });
 });
