@@ -17,14 +17,26 @@ document.addEventListener("DOMContentLoaded", function() {
     // Start timing the total duration for all promises
     const startTotalTime = Date.now();
 
+    // Get the table element
+    const table = document.getElementById('promiseTable');
+
+    if (!table) {
+        console.error('Table with id "promiseTable" not found.');
+        return;
+    }
+
+    // Add a loading row
+    table.innerHTML = '<tr id="loading"><td colspan="2">Loading...</td></tr>';
+
     // Wait for all promises to resolve using Promise.all
     Promise.all(promises).then(results => {
         const totalTime = (Date.now() - startTotalTime) / 1000; // Total time in seconds
 
-        const table = document.getElementById('promiseTable');
-
-        // Remove the loading row
-        table.innerHTML = '';
+        // Clear the loading row
+        const loadingRow = document.getElementById('loading');
+        if (loadingRow) {
+            loadingRow.remove();
+        }
 
         // Populate the table with the results
         results.forEach(result => {
@@ -41,5 +53,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const cell2 = totalRow.insertCell(1);
         cell1.textContent = 'Total';
         cell2.textContent = `${totalTime.toFixed(3)} seconds`;
+    }).catch(error => {
+        console.error('Error handling promises:', error);
     });
 });
