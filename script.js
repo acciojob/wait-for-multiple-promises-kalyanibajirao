@@ -43,4 +43,3 @@ document.addEventListener("DOMContentLoaded", function() {
         cell2.textContent = `${totalTime.toFixed(3)} seconds`;
     });
 });
-
